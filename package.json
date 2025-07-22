@@ -1,0 +1,24 @@
+{
+  "name": "cctime",
+  "module": "src/cli.tsx",
+  "type": "module",
+  "bin": {
+    "cctime": "./src/cli.tsx"
+  },
+  "scripts": {
+    "start": "bun run src/cli.tsx",
+    "dev": "bun --watch src/cli.tsx"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/react": "^19.1.8"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "commander": "^14.0.0",
+    "ink": "^6.0.1",
+    "react": "^19.1.0"
+  }
+}
