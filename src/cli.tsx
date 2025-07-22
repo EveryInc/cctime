@@ -16,6 +16,7 @@ import { analyzeAssistantSequences } from './assistant-sequence-analyzer.js';
 import { displaySequenceAnalysis } from './display-sequences.js';
 import { findLongestSequence } from './find-longest-sequence.js';
 import * as fs from 'fs/promises';
+import path from 'path';
 
 const program = new Command();
 
@@ -58,11 +59,53 @@ async function main() {
       console.log('Loading transcript data...');
       
       try {
-        // Find session files based on options
-        const finder = new SessionFinder();
-        const files = await finder.find({
-          projectPath: options.dir || process.cwd()
-        });
+        let files = [];
+        
+        if (options.file) {
+          // Direct file analysis
+          const stat = await fs.stat(options.file);
+          if (!stat.isFile() || !options.file.endsWith('.jsonl')) {
+            console.error('Invalid file: must be a .jsonl file');
+            process.exit(1);
+          }
+          
+          const sessionId = path.basename(options.file, '.jsonl');
+          files = [{
+            sessionId,
+            projectPath: path.dirname(options.file),
+            filePath: options.file,
+            lastModified: stat.mtime,
+            size: stat.size
+          }];
+        } else if (options.dir) {
+          // Directory analysis
+          const dirStat = await fs.stat(options.dir);
+          if (!dirStat.isDirectory()) {
+            console.error('Invalid directory');
+            process.exit(1);
+          }
+          
+          const dirFiles = await fs.readdir(options.dir);
+          const jsonlFiles = dirFiles.filter(f => f.endsWith('.jsonl'));
+          
+          for (const file of jsonlFiles) {
+            const filePath = path.join(options.dir, file);
+            const fileStat = await fs.stat(filePath);
+            const sessionId = file.replace('.jsonl', '');
+            
+            files.push({
+              sessionId,
+              projectPath: options.dir,
+              filePath,
+              lastModified: fileStat.mtime,
+              size: fileStat.size
+            });
+          }
+        } else {
+          // Default: search all projects
+          const finder = new SessionFinder();
+          files = await finder.find({});
+        }
         
         if (files.length === 0) {
           console.error('No transcript files found');
@@ -121,7 +164,7 @@ async function main() {
     } else if (options.longest) {
       // Find longest assistant processing time
       try {
-        await findLongestSequence(options.dir || process.cwd());
+        await findLongestSequence({ file: options.file, dir: options.dir });
       } catch (error) {
         console.error('Error:', error.message);
         process.exit(1);
@@ -131,11 +174,53 @@ async function main() {
       console.log('Analyzing assistant response sequences...');
       
       try {
-        // Find session files
-        const finder = new SessionFinder();
-        const files = await finder.find({
-          projectPath: options.dir || process.cwd()
-        });
+        let files = [];
+        
+        if (options.file) {
+          // Direct file analysis
+          const stat = await fs.stat(options.file);
+          if (!stat.isFile() || !options.file.endsWith('.jsonl')) {
+            console.error('Invalid file: must be a .jsonl file');
+            process.exit(1);
+          }
+          
+          const sessionId = path.basename(options.file, '.jsonl');
+          files = [{
+            sessionId,
+            projectPath: path.dirname(options.file),
+            filePath: options.file,
+            lastModified: stat.mtime,
+            size: stat.size
+          }];
+        } else if (options.dir) {
+          // Directory analysis
+          const dirStat = await fs.stat(options.dir);
+          if (!dirStat.isDirectory()) {
+            console.error('Invalid directory');
+            process.exit(1);
+          }
+          
+          const dirFiles = await fs.readdir(options.dir);
+          const jsonlFiles = dirFiles.filter(f => f.endsWith('.jsonl'));
+          
+          for (const file of jsonlFiles) {
+            const filePath = path.join(options.dir, file);
+            const fileStat = await fs.stat(filePath);
+            const sessionId = file.replace('.jsonl', '');
+            
+            files.push({
+              sessionId,
+              projectPath: options.dir,
+              filePath,
+              lastModified: fileStat.mtime,
+              size: fileStat.size
+            });
+          }
+        } else {
+          // Default: search all projects
+          const finder = new SessionFinder();
+          files = await finder.find({});
+        }
         
         if (files.length === 0) {
           console.error('No transcript files found');
@@ -173,7 +258,7 @@ async function main() {
     } else {
       // Default: Find longest assistant processing time
       try {
-        await findLongestSequence(options.dir || process.cwd());
+        await findLongestSequence({ file: options.file, dir: options.dir });
       } catch (error) {
         console.error('Error:', error.message);
         process.exit(1);
