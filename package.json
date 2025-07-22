@@ -1,17 +1,23 @@
 {
-  "name": "cctime",
-  "version": "0.1.0",
+  "name": "@every-env/cctime",
+  "version": "1.0.0",
   "description": "Claude Code Transcript Time Analyzer - Analyze response times from claude.ai transcripts",
-  "main": "src/cli.tsx",
-  "module": "src/cli.tsx",
+  "main": "dist/cli.js",
+  "module": "dist/cli.js", 
   "type": "module",
   "bin": {
-    "cctime": "./src/cli.tsx"
+    "cctime": "./dist/cli.js"
   },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "package.json"
+  ],
   "scripts": {
     "start": "bun run src/cli.tsx",
     "dev": "bun --watch src/cli.tsx",
-    "build": "bun build src/cli.tsx --outdir dist --target node",
+    "build": "bun build src/cli.tsx --outdir dist --target node --format esm --external react --external ink --external commander --external chalk --external date-fns --external zod --external asciichart --external csv-writer",
+    "prepublishOnly": "bun run build",
     "test": "bun test",
     "lint": "eslint src --ext .ts,.tsx",
     "format": "prettier --write src/**/*.{ts,tsx}"
@@ -24,7 +30,18 @@
     "performance",
     "response-time"
   ],
-  "author": "",
+  "author": "Every Environment",
+  "homepage": "https://github.com/EveryInc/cctime",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EveryInc/cctime.git"
+  },
+  "bugs": {
+    "url": "https://github.com/EveryInc/cctime/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "MIT",
   "devDependencies": {
     "@types/asciichart": "^1.5.8",
