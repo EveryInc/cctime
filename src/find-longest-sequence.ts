@@ -1,20 +1,79 @@
 import chalk from 'chalk';
 import { SessionFinder } from './finder.js';
 import { analyzeAssistantSequences, formatDuration } from './assistant-sequence-analyzer.js';
+import { promises as fs } from 'fs';
+import path from 'path';
 
-export async function findLongestSequence(projectPath?: string): Promise<void> {
+interface FindLongestOptions {
+  file?: string;
+  dir?: string;
+}
+
+export async function findLongestSequence(options: FindLongestOptions = {}): Promise<void> {
   console.log('Searching for longest assistant processing time...\n');
   
-  // Find all session files
-  const finder = new SessionFinder();
-  const files = await finder.find({ projectPath });
+  let files = [];
   
-  if (files.length === 0) {
-    console.error('No transcript files found');
-    return;
+  if (options.file) {
+    // Direct file analysis
+    const stat = await fs.stat(options.file);
+    if (!stat.isFile() || !options.file.endsWith('.jsonl')) {
+      console.error('Invalid file: must be a .jsonl file');
+      return;
+    }
+    
+    const sessionId = path.basename(options.file, '.jsonl');
+    files = [{
+      sessionId,
+      projectPath: path.dirname(options.file),
+      filePath: options.file,
+      lastModified: stat.mtime,
+      size: stat.size
+    }];
+    console.log(`Analyzing single file: ${path.basename(options.file)}\n`);
+  } else if (options.dir) {
+    // Directory analysis
+    const dirStat = await fs.stat(options.dir);
+    if (!dirStat.isDirectory()) {
+      console.error('Invalid directory');
+      return;
+    }
+    
+    const dirFiles = await fs.readdir(options.dir);
+    const jsonlFiles = dirFiles.filter(f => f.endsWith('.jsonl'));
+    
+    for (const file of jsonlFiles) {
+      const filePath = path.join(options.dir, file);
+      const fileStat = await fs.stat(filePath);
+      const sessionId = file.replace('.jsonl', '');
+      
+      files.push({
+        sessionId,
+        projectPath: options.dir,
+        filePath,
+        lastModified: fileStat.mtime,
+        size: fileStat.size
+      });
+    }
+    
+    if (files.length === 0) {
+      console.error('No .jsonl files found in directory');
+      return;
+    }
+    
+    console.log(`Found ${files.length} transcript files in directory\n`);
+  } else {
+    // Default: search all projects
+    const finder = new SessionFinder();
+    files = await finder.find({});
+    
+    if (files.length === 0) {
+      console.error('No transcript files found');
+      return;
+    }
+    
+    console.log(`Found ${files.length} transcript files\n`);
   }
-  
-  console.log(`Found ${files.length} transcript files\n`);
   
   let longestSequence: any = null;
   let longestSessionId = '';
