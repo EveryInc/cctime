@@ -1,5 +1,8 @@
 {
   "name": "cctime",
+  "version": "0.1.0",
+  "description": "Claude Code Transcript Time Analyzer - Analyze response times from claude.ai transcripts",
+  "main": "src/cli.tsx",
   "module": "src/cli.tsx",
   "type": "module",
   "bin": {
@@ -7,18 +10,54 @@
   },
   "scripts": {
     "start": "bun run src/cli.tsx",
-    "dev": "bun --watch src/cli.tsx"
+    "dev": "bun --watch src/cli.tsx",
+    "build": "bun build src/cli.tsx --outdir dist --target node",
+    "test": "bun test",
+    "lint": "eslint src --ext .ts,.tsx",
+    "format": "prettier --write src/**/*.{ts,tsx}"
   },
+  "keywords": [
+    "claude",
+    "transcript",
+    "analyzer",
+    "cli",
+    "performance",
+    "response-time"
+  ],
+  "author": "",
+  "license": "MIT",
   "devDependencies": {
+    "@types/asciichart": "^1.5.8",
     "@types/bun": "latest",
-    "@types/react": "^19.1.8"
+    "@types/node": "^20.11.5",
+    "@types/react": "^19.1.8",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "asciichart": "^1.5.25",
+    "chalk": "^5.3.0",
     "commander": "^14.0.0",
+    "csv-writer": "^1.6.0",
+    "date-fns": "^3.2.0",
     "ink": "^6.0.1",
-    "react": "^19.1.0"
+    "ink-big-text": "^2.0.0",
+    "ink-gradient": "^3.0.0",
+    "ink-link": "^4.0.0",
+    "ink-select-input": "^6.0.0",
+    "ink-spinner": "^5.0.0",
+    "ink-text-input": "^6.0.0",
+    "react": "^19.1.0",
+    "zod": "^3.22.4"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "bun": ">=1.0.0"
   }
 }
