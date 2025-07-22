@@ -22,7 +22,12 @@ function extractMessageText(message: any): string {
   }
   
   if (message && typeof message === 'object') {
-    // Handle Claude's message format
+    // Handle direct string content (newer format)
+    if (message.content && typeof message.content === 'string') {
+      return message.content;
+    }
+    
+    // Handle Claude's array format
     if (message.content && Array.isArray(message.content)) {
       // Filter for actual text content (not tool results)
       const textContent = message.content
@@ -89,6 +94,13 @@ export async function analyzeAssistantSequences(
     }
   }
   
+  if (global.DEBUG_MODE) {
+    console.log(`\nDEBUG: Analyzing ${filePath}`);
+    console.log(`DEBUG: Found ${rawEntries.length} total entries`);
+    console.log(`DEBUG: User entries: ${rawEntries.filter(e => e.type === 'user').length}`);
+    console.log(`DEBUG: Assistant entries: ${rawEntries.filter(e => e.type === 'assistant').length}`);
+  }
+  
   const sequences: AssistantSequence[] = [];
   
   let i = 0;
@@ -142,8 +154,17 @@ export async function analyzeAssistantSequences(
       const userMessage = extractMessageText(userEntry.message);
       const userTimestamp = userEntry.timestamp;
       
+      if (global.DEBUG_MODE) {
+        console.log(`\nDEBUG: Found potential user message at index ${i}:`);
+        console.log(`  Message: "${userMessage}"`);
+        console.log(`  Timestamp: ${userTimestamp}`);
+      }
+      
       // Skip empty messages
       if (!userMessage || userMessage === '[No text content]') {
+        if (global.DEBUG_MODE) {
+          console.log(`  Skipping: Empty message`);
+        }
         i++;
         continue;
       }
@@ -220,6 +241,13 @@ export async function analyzeAssistantSequences(
         const responseTimeMs = firstTimestamp.getTime() - userTime.getTime();
         const durationMs = lastTimestamp.getTime() - firstTimestamp.getTime();
         
+        if (global.DEBUG_MODE) {
+          console.log(`  Found sequence:`);
+          console.log(`    First assistant at index: ${firstAssistantIndex}`);
+          console.log(`    Last assistant at index: ${lastAssistantIndex}`);
+          console.log(`    Duration: ${durationMs}ms`);
+        }
+        
         sequences.push({
           userMessage: userMessage.substring(0, 100) + (userMessage.length > 100 ? '...' : ''),
           userTimestamp,
@@ -230,6 +258,10 @@ export async function analyzeAssistantSequences(
           messageCount,
           toolUseCount
         });
+      } else {
+        if (global.DEBUG_MODE) {
+          console.log(`  No assistant messages found after this user message`);
+        }
       }
       
       // Move to the next user message
