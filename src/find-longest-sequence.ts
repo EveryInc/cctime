@@ -3,6 +3,8 @@ import { SessionFinder } from './finder.js';
 import { analyzeAssistantSequences, formatDuration } from './assistant-sequence-analyzer.js';
 import { promises as fs } from 'fs';
 import path from 'path';
+import gradient from 'gradient-string';
+import figlet from 'figlet';
 
 interface FindLongestOptions {
   file?: string;
@@ -13,6 +15,7 @@ export async function findLongestSequence(options: FindLongestOptions = {}): Pro
   process.stdout.write('Loading...');
   
   let files = [];
+  let totalSequences = 0;
   
   if (options.file) {
     // Direct file analysis
@@ -87,6 +90,9 @@ export async function findLongestSequence(options: FindLongestOptions = {}): Pro
         file.projectPath
       );
       
+      // Count total sequences
+      totalSequences += analysis.sequences.length;
+      
       // Check all sequences in this session
       for (const sequence of analysis.sequences) {
         if (!longestSequence || sequence.durationMs > longestSequence.durationMs) {
@@ -106,10 +112,22 @@ export async function findLongestSequence(options: FindLongestOptions = {}): Pro
     return;
   }
   
-  // Clear the loading message
-  process.stdout.write('\r\x1b[K');
+  // Clear the entire terminal
+  console.clear();
   
-  // Display the longest sequence
-  console.log(chalk.cyan.bold(`🏆 Claude operated independently for ${chalk.yellow.bold(formatDuration(longestSequence.durationMs))} straight`));
-  console.log(chalk.gray('\nBrought to you by @every'));
+  // Display the longest sequence as highscore
+  console.log(chalk.cyan.bold(`🏆 Claude agentic highscore: ${chalk.yellow.bold(formatDuration(longestSequence.durationMs))} (best from ${totalSequences} total sessions)`));
+  console.log(chalk.gray('\nTry it yourself with: npx claude-highscore@latest'));
+  console.log(chalk.gray('\nBrought to you by'));
+  
+  // Display fancy EVERY text with letter spacing
+  const everyText = figlet.textSync('EVERY', {
+    font: 'Big',
+    horizontalLayout: 'fitted', // Moderate spacing between letters
+    verticalLayout: 'default'
+  });
+  
+  // No gradient, just plain text
+  console.log('\n' + everyText);
+  console.log(chalk.gray('@every'));
 }

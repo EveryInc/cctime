@@ -5,8 +5,10 @@ import {
   BaseChart, 
   BaseProgressBar, 
   BaseKeyboardHints,
-  commonHints 
+  commonHints
 } from '../base/index.js';
+import BigText from 'ink-big-text';
+import Gradient from 'ink-gradient';
 import {
   useAppState,
   useAppDispatch,
@@ -301,6 +303,16 @@ export function Dashboard() {
       {/* Keyboard hints */}
       <Box marginTop={1}>
         <BaseKeyboardHints hints={keyboardHints} />
+      </Box>
+      
+      {/* Footer with branding */}
+      <Box marginTop={2} flexDirection="column" alignItems="center">
+        <Text dimColor>Brought to you by</Text>
+        <Box marginTop={1}>
+          <Gradient name="morning">
+            <BigText text="EVERY" font="slick" />
+          </Gradient>
+        </Box>
       </Box>
     </Box>
   );
