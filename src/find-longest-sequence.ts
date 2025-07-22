@@ -3,7 +3,6 @@ import { SessionFinder } from './finder.js';
 import { analyzeAssistantSequences, formatDuration } from './assistant-sequence-analyzer.js';
 import { promises as fs } from 'fs';
 import path from 'path';
-import gradient from 'gradient-string';
 import figlet from 'figlet';
 
 interface FindLongestOptions {
