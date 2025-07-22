@@ -1,6 +1,6 @@
 {
   "name": "@every-env/cctime",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Claude Code Transcript Time Analyzer - Analyze response times from claude.ai transcripts",
   "main": "dist/cli.js",
   "module": "dist/cli.js", 

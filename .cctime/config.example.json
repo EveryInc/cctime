@@ -1,0 +1,18 @@
+{
+  "defaultOutputFormat": "table",
+  "defaultExportPath": "./cctime-export",
+  "theme": {
+    "primaryColor": "cyan",
+    "accentColor": "yellow",
+    "chartStyle": "line"
+  },
+  "analysis": {
+    "includeSystemMessages": false,
+    "groupBySession": true,
+    "timeFormat": "24h"
+  },
+  "export": {
+    "includeMetadata": true,
+    "prettyPrint": true
+  }
+}

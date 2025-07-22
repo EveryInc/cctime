@@ -33,12 +33,22 @@ program
   .option('-w, --watch', 'Watch for changes in session files')
   .option('--analyze-sequences', 'Analyze assistant response sequences')
   .option('--longest', 'Find the single longest assistant processing time')
+  .option('--debug', 'Enable debug logging for troubleshooting')
   .parse(process.argv);
 
 const options = program.opts();
 
 async function main() {
   try {
+    // Set global debug flag
+    global.DEBUG_MODE = options.debug || false;
+    
+    if (options.debug) {
+      console.log('🐛 Debug mode enabled');
+      console.log('🏠 Home directory:', require('os').homedir());
+      console.log('📁 Expected Claude projects directory:', require('path').join(require('os').homedir(), '.claude', 'projects'));
+    }
+    
     // Load configuration
     const config = await loadConfig(options.config);
     const configManager = new ConfigManager(config);

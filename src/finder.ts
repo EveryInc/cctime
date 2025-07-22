@@ -11,6 +11,10 @@ export class SessionFinder {
 
   constructor(projectsDir?: string) {
     this.projectsDir = projectsDir || path.join(os.homedir(), '.claude', 'projects');
+    
+    if (global.DEBUG_MODE) {
+      console.log(`🔍 SessionFinder initialized with projects directory: ${this.projectsDir}`);
+    }
   }
 
   /**
@@ -55,16 +59,31 @@ export class SessionFinder {
   async find(options: FindOptions = {}): Promise<SessionFile[]> {
     const sessionFiles: SessionFile[] = [];
 
+    if (global.DEBUG_MODE) {
+      console.log(`📂 Scanning for transcript files in: ${this.projectsDir}`);
+    }
+
     try {
       // Check if projects directory exists
       await fs.access(this.projectsDir);
+      if (global.DEBUG_MODE) {
+        console.log('✅ Projects directory exists and is accessible');
+      }
     } catch (error) {
       // Projects directory doesn't exist yet
+      if (global.DEBUG_MODE) {
+        console.log('❌ Projects directory does not exist or is not accessible');
+        console.log(`   Error: ${error.message}`);
+      }
       return sessionFiles;
     }
 
     // Get all project directories
     const projectDirs = await fs.readdir(this.projectsDir);
+
+    if (global.DEBUG_MODE) {
+      console.log(`📁 Found ${projectDirs.length} items in projects directory: [${projectDirs.join(', ')}]`);
+    }
 
     for (const projectDir of projectDirs) {
       const projectDirPath = path.join(this.projectsDir, projectDir);
@@ -85,6 +104,11 @@ export class SessionFinder {
       // Get all .jsonl files in this project directory
       const files = await fs.readdir(projectDirPath);
       const jsonlFiles = files.filter(f => f.endsWith('.jsonl'));
+
+      if (global.DEBUG_MODE) {
+        console.log(`  📁 Project: ${projectPath} (${projectDir})`);
+        console.log(`     Found ${jsonlFiles.length} .jsonl files: [${jsonlFiles.join(', ')}]`);
+      }
 
       for (const file of jsonlFiles) {
         const filePath = path.join(projectDirPath, file);
@@ -120,6 +144,13 @@ export class SessionFinder {
         if (this.isWithinDateRange(sessionFile, options)) {
           sessionFiles.push(sessionFile);
         }
+      }
+    }
+
+    if (global.DEBUG_MODE) {
+      console.log(`🎯 Total found: ${sessionFiles.length} session files`);
+      if (sessionFiles.length > 0) {
+        console.log(`   Most recent: ${sessionFiles[0]?.sessionId} (${sessionFiles[0]?.lastModified.toISOString()})`);
       }
     }
 

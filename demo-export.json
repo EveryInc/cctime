@@ -1,0 +1,118 @@
+{
+  "summary": {
+    "totalResponseTimeMs": 31600,
+    "totalResponses": 11,
+    "averageResponseTimeMs": 2872.7272727272725,
+    "uniqueSessions": 6,
+    "dateRange": {
+      "from": "2024-01-15T10:00:00.000Z",
+      "to": "2024-01-17T10:00:00.000Z"
+    }
+  },
+  "daily": [
+    {
+      "date": "2024-01-15",
+      "totalResponseTimeMs": 11600,
+      "averageResponseTimeMs": 2900,
+      "responseCount": 4,
+      "sessionCount": 2,
+      "sessions": [
+        "session-1",
+        "session-2"
+      ],
+      "percentiles": {
+        "p50": 2500,
+        "p90": 4100,
+        "p99": 4100
+      }
+    },
+    {
+      "date": "2024-01-16",
+      "totalResponseTimeMs": 7500,
+      "averageResponseTimeMs": 2500,
+      "responseCount": 3,
+      "sessionCount": 2,
+      "sessions": [
+        "session-3",
+        "session-4"
+      ],
+      "percentiles": {
+        "p50": 2800,
+        "p90": 3500,
+        "p99": 3500
+      }
+    },
+    {
+      "date": "2024-01-17",
+      "totalResponseTimeMs": 12500,
+      "averageResponseTimeMs": 3125,
+      "responseCount": 4,
+      "sessionCount": 2,
+      "sessions": [
+        "session-5",
+        "session-6"
+      ],
+      "percentiles": {
+        "p50": 2200,
+        "p90": 5000,
+        "p99": 5000
+      }
+    }
+  ],
+  "sessions": [
+    {
+      "sessionId": "session-1",
+      "projectPath": "/demo/project",
+      "totalResponses": 2,
+      "totalResponseTimeMs": 5700,
+      "averageResponseTimeMs": 2850,
+      "firstMessage": "2024-01-15T10:00:00Z",
+      "lastMessage": "2024-01-15T10:00:03Z"
+    },
+    {
+      "sessionId": "session-2",
+      "projectPath": "/demo/project",
+      "totalResponses": 2,
+      "totalResponseTimeMs": 5900,
+      "averageResponseTimeMs": 2950,
+      "firstMessage": "2024-01-15T10:00:00Z",
+      "lastMessage": "2024-01-15T10:00:04Z"
+    },
+    {
+      "sessionId": "session-3",
+      "projectPath": "/demo/project",
+      "totalResponses": 2,
+      "totalResponseTimeMs": 4000,
+      "averageResponseTimeMs": 2000,
+      "firstMessage": "2024-01-16T10:00:00Z",
+      "lastMessage": "2024-01-16T10:00:02Z"
+    },
+    {
+      "sessionId": "session-4",
+      "projectPath": "/demo/project",
+      "totalResponses": 1,
+      "totalResponseTimeMs": 3500,
+      "averageResponseTimeMs": 3500,
+      "firstMessage": "2024-01-16T10:00:00Z",
+      "lastMessage": "2024-01-16T10:00:03Z"
+    },
+    {
+      "sessionId": "session-5",
+      "projectPath": "/demo/project",
+      "totalResponses": 3,
+      "totalResponseTimeMs": 8700,
+      "averageResponseTimeMs": 2900,
+      "firstMessage": "2024-01-17T10:00:00Z",
+      "lastMessage": "2024-01-17T10:00:01Z"
+    },
+    {
+      "sessionId": "session-6",
+      "projectPath": "/demo/project",
+      "totalResponses": 1,
+      "totalResponseTimeMs": 3800,
+      "averageResponseTimeMs": 3800,
+      "firstMessage": "2024-01-17T10:00:00Z",
+      "lastMessage": "2024-01-17T10:00:03Z"
+    }
+  ]
+}
