@@ -107,17 +107,29 @@ export class SessionFinder {
 
       if (global.DEBUG_MODE) {
         console.log(`  📁 Project: ${projectPath} (${projectDir})`);
-        console.log(`     Found ${jsonlFiles.length} .jsonl files: [${jsonlFiles.join(', ')}]`);
+        console.log(`     All files found: [${files.join(', ')}]`);
+        console.log(`     Filtered to ${jsonlFiles.length} .jsonl files: [${jsonlFiles.join(', ')}]`);
       }
 
       for (const file of jsonlFiles) {
         const filePath = path.join(projectDirPath, file);
         const fileStat = await fs.stat(filePath);
         
+        if (global.DEBUG_MODE) {
+          console.log(`     Processing file: ${file}`);
+          console.log(`       Size: ${fileStat.size} bytes`);
+          console.log(`       Modified: ${fileStat.mtime.toISOString()}`);
+        }
+        
         const sessionId = this.parseSessionId(file);
         if (!sessionId) {
           // For now, use the filename without extension as session ID
           const fallbackId = file.replace('.jsonl', '');
+          
+          if (global.DEBUG_MODE) {
+            console.log(`       No session ID match, using fallback: ${fallbackId}`);
+          }
+          
           const sessionFile: SessionFile = {
             sessionId: fallbackId,
             projectPath,
@@ -128,8 +140,19 @@ export class SessionFinder {
           
           if (this.isWithinDateRange(sessionFile, options)) {
             sessionFiles.push(sessionFile);
+            if (global.DEBUG_MODE) {
+              console.log(`       ✅ Added to session files`);
+            }
+          } else {
+            if (global.DEBUG_MODE) {
+              console.log(`       ❌ Filtered out by date range`);
+            }
           }
           continue;
+        }
+
+        if (global.DEBUG_MODE) {
+          console.log(`       Parsed session ID: ${sessionId}`);
         }
 
         const sessionFile: SessionFile = {
@@ -143,6 +166,13 @@ export class SessionFinder {
         // Check date range
         if (this.isWithinDateRange(sessionFile, options)) {
           sessionFiles.push(sessionFile);
+          if (global.DEBUG_MODE) {
+            console.log(`       ✅ Added to session files`);
+          }
+        } else {
+          if (global.DEBUG_MODE) {
+            console.log(`       ❌ Filtered out by date range`);
+          }
         }
       }
     }
