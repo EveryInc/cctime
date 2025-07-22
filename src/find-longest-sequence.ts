@@ -107,18 +107,7 @@ export async function findLongestSequence(options: FindLongestOptions = {}): Pro
   }
   
   // Display the longest sequence
-  console.log(chalk.cyan.bold('🏆 Longest Assistant Processing Time Found:\n'));
-  
-  console.log(chalk.yellow.bold(`Processing Time: ${formatDuration(longestSequence.durationMs)}`));
-  console.log(chalk.dim(`(Time from first to last assistant message)\n`));
-  
-  console.log(`Session: ${chalk.white(longestSessionId.substring(0, 8))}...`);
-  console.log(`Project: ${chalk.white(longestProjectPath.split('/').pop() || 'Unknown')}`);
-  console.log(`Response Time: ${chalk.gray(formatDuration(longestSequence.responseTimeMs))} ${chalk.dim('(user → assistant)')}`);
-  console.log(`Messages: ${longestSequence.messageCount} | Tool Uses: ${longestSequence.toolUseCount}`);
-  console.log(`\nUser Query: "${chalk.italic(longestSequence.userMessage)}"`);
-  console.log(`\nTimestamps:`);
-  console.log(`  User sent: ${new Date(longestSequence.userTimestamp).toLocaleString()}`);
-  console.log(`  Assistant started: ${new Date(longestSequence.firstAssistantTimestamp).toLocaleString()}`);
-  console.log(`  Assistant finished: ${new Date(longestSequence.lastAssistantTimestamp).toLocaleString()}`);
+  const projectName = longestProjectPath.split('/').pop() || 'Unknown';
+  console.log(chalk.cyan.bold(`🏆 Longest Assistant Processing Time Found inside ${projectName}`));
+  console.log(chalk.yellow.bold(formatDuration(longestSequence.durationMs)));
 }
