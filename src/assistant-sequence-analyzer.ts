@@ -1,5 +1,6 @@
 import { TranscriptEntry } from './types/index.js';
 import { parseTranscriptFile } from './parser/index.js';
+import { readFile } from 'fs/promises';
 
 export interface AssistantSequence {
   userMessage: string;
@@ -73,14 +74,35 @@ export async function analyzeAssistantSequences(
   sessionId: string,
   projectPath: string
 ): Promise<SessionSequenceAnalysis> {
-  const entries = await parseTranscriptFile(filePath);
+  // Read raw file to access all fields including isCompactSummary
+  const fileContent = await readFile(filePath, 'utf-8');
+  const lines = fileContent.split('\n').filter(line => line.trim());
+  const rawEntries: any[] = [];
+  
+  // Parse each line to get both raw data and parsed entries
+  for (const line of lines) {
+    try {
+      const rawEntry = JSON.parse(line);
+      rawEntries.push(rawEntry);
+    } catch (error) {
+      // Skip invalid lines
+    }
+  }
+  
   const sequences: AssistantSequence[] = [];
   
   let i = 0;
-  while (i < entries.length) {
+  while (i < rawEntries.length) {
     // Find TRUE user message (not tool results)
-    if (entries[i].type === 'user' && entries[i].message) {
-      const userEntry = entries[i];
+    const entry = rawEntries[i];
+    if (entry.type === 'user' && entry.message) {
+      const userEntry = entry;
+      
+      // Check if this is a compact summary (session continuation)
+      if (userEntry.isCompactSummary === true) {
+        i++;
+        continue; // Skip compact summaries as they're not real user messages
+      }
       
       // Check if this is actually a tool result (not a real user message)
       const messageObj = userEntry.message as any;
@@ -123,11 +145,17 @@ export async function analyzeAssistantSequences(
       let toolUseCount = 0;
       
       // Look for assistant responses after this user message
-      for (let j = i + 1; j < entries.length; j++) {
-        const entry = entries[j];
+      for (let j = i + 1; j < rawEntries.length; j++) {
+        const entry = rawEntries[j];
         
         // Check if this is a TRUE user message (not a tool result)
         if (entry.type === 'user') {
+          // Check if this is a compact summary (session continuation)
+          if (entry.isCompactSummary === true) {
+            // Continue through compact summaries as they're not real user messages
+            continue;
+          }
+          
           const msgObj = entry.message as any;
           if (msgObj && typeof msgObj === 'string') {
             break; // Real user message as string
@@ -148,7 +176,7 @@ export async function analyzeAssistantSequences(
           }
         }
         
-        // Track assistant messages and tool results
+        // Track assistant messages
         if (entry.type === 'assistant') {
           if (firstAssistantIndex === -1) {
             firstAssistantIndex = j;
@@ -163,25 +191,24 @@ export async function analyzeAssistantSequences(
               toolUseCount += toolUses;
             }
           }
-        } else if (entry.type === 'user') {
-          // This must be a tool result (we already checked for real user messages above)
-          lastAssistantIndex = j; // Tool results are part of assistant's processing
         }
+        // Note: We don't update lastAssistantIndex for tool results (user entries)
+        // as they are interleaved messages, not the end of the sequence
       }
       
       // If we found assistant messages, create a sequence
       if (firstAssistantIndex !== -1 && lastAssistantIndex !== -1) {
         const userTime = new Date(userTimestamp);
-        const firstTimestamp = new Date(entries[firstAssistantIndex].timestamp);
-        const lastTimestamp = new Date(entries[lastAssistantIndex].timestamp);
+        const firstTimestamp = new Date(rawEntries[firstAssistantIndex].timestamp);
+        const lastTimestamp = new Date(rawEntries[lastAssistantIndex].timestamp);
         const responseTimeMs = firstTimestamp.getTime() - userTime.getTime();
         const durationMs = lastTimestamp.getTime() - firstTimestamp.getTime();
         
         sequences.push({
           userMessage: userMessage.substring(0, 100) + (userMessage.length > 100 ? '...' : ''),
           userTimestamp,
-          firstAssistantTimestamp: entries[firstAssistantIndex].timestamp,
-          lastAssistantTimestamp: entries[lastAssistantIndex].timestamp,
+          firstAssistantTimestamp: rawEntries[firstAssistantIndex].timestamp,
+          lastAssistantTimestamp: rawEntries[lastAssistantIndex].timestamp,
           responseTimeMs,
           durationMs,
           messageCount,

@@ -1,9 +1,9 @@
 {
   "name": "@every-env/cctime",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Claude Code Transcript Time Analyzer - Analyze response times from claude.ai transcripts",
   "main": "dist/cli.js",
-  "module": "dist/cli.js", 
+  "module": "dist/cli.js",
   "type": "module",
   "bin": {
     "cctime": "./dist/cli.js"
@@ -16,7 +16,7 @@
   "scripts": {
     "start": "bun run src/cli.tsx",
     "dev": "bun --watch src/cli.tsx",
-    "build": "bun build src/cli.tsx --outdir dist --target node --format esm --external react --external ink --external commander --external chalk --external date-fns --external zod --external asciichart --external csv-writer && sed -i '' '1s|.*|#!/usr/bin/env node|' dist/cli.js",
+    "build": "bun build src/cli.tsx --outdir dist --target node --format esm --external react --external ink --external commander --external chalk --external date-fns --external zod --external asciichart --external csv-writer && sed -i '' '1s|.*|#!/usr/bin/env node|' dist/cli.js && sed -i '' '2d' dist/cli.js",
     "prepublishOnly": "bun run build",
     "test": "bun test",
     "lint": "eslint src --ext .ts,.tsx",
