@@ -114,11 +114,8 @@ export async function findLongestSequence(options: FindLongestOptions = {}): Pro
   // Clear the entire terminal
   console.clear();
   
-  // Extract project name from path
-  const projectName = longestProjectPath.split('/').pop() || 'unknown';
-  
   // Display the longest sequence as highscore
-  console.log(chalk.cyan.bold(`🏆 Claude agentic highscore: ${chalk.yellow.bold(formatDuration(longestSequence.durationMs))} inside ${chalk.green.bold(projectName)} (best from ${totalSequences} total sessions)`));
+  console.log(chalk.cyan.bold(`🏆 Claude agentic highscore: ${chalk.yellow.bold(formatDuration(longestSequence.durationMs))} (best from ${totalSequences} total sessions)`));
   console.log(chalk.gray('\nTry it yourself with: npx claude-highscore@latest'));
   console.log(chalk.gray('\nBrought to you by'));
   
