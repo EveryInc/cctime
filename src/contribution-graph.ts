@@ -138,7 +138,6 @@ function renderGraph(grid: DayData[][], startDate: Date, endDate: Date, totalSes
   }
 
   // Add legend
-  lines.push('');
   lines.push('    ' + chalk.gray('Less ') + colors[0] + colors[1] + colors[2] + colors[3] + colors[4] + chalk.gray(' More'));
   
   // Add date range info
