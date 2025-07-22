@@ -107,7 +107,5 @@ export async function findLongestSequence(options: FindLongestOptions = {}): Pro
   }
   
   // Display the longest sequence
-  const projectName = longestProjectPath.split('/').pop() || 'Unknown';
-  console.log(chalk.cyan.bold(`🏆 Longest Assistant Processing Time Found inside ${projectName}`));
-  console.log(chalk.yellow.bold(formatDuration(longestSequence.durationMs)));
+  console.log(chalk.cyan.bold(`🏆 Claude operated independently for ${chalk.yellow.bold(formatDuration(longestSequence.durationMs))} straight`));
 }
