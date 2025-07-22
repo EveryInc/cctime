@@ -107,6 +107,16 @@ export async function analyzeAssistantSequences(
       // Check if this is actually a tool result (not a real user message)
       const messageObj = userEntry.message as any;
       
+      // Skip command messages and system messages
+      if (typeof messageObj === 'string') {
+        if (messageObj.includes('<command-') || 
+            messageObj.includes('<system-reminder>') ||
+            messageObj.includes('<user-prompt-submit-hook>')) {
+          i++;
+          continue; // Skip synthetic/system messages
+        }
+      }
+      
       // Skip if message.role exists and content is array with tool_use_id
       if (messageObj && messageObj.role === 'user' && messageObj.content) {
         if (Array.isArray(messageObj.content)) {
@@ -158,6 +168,12 @@ export async function analyzeAssistantSequences(
           
           const msgObj = entry.message as any;
           if (msgObj && typeof msgObj === 'string') {
+            // Check if it's a synthetic/system message
+            if (msgObj.includes('<command-') || 
+                msgObj.includes('<system-reminder>') ||
+                msgObj.includes('<user-prompt-submit-hook>')) {
+              continue; // Skip synthetic/system messages
+            }
             break; // Real user message as string
           }
           if (msgObj && msgObj.role === 'user' && msgObj.content) {

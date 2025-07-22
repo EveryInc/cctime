@@ -10,7 +10,7 @@ interface FindLongestOptions {
 }
 
 export async function findLongestSequence(options: FindLongestOptions = {}): Promise<void> {
-  console.log('Searching for longest assistant processing time...\n');
+  process.stdout.write('Loading...');
   
   let files = [];
   
@@ -18,6 +18,7 @@ export async function findLongestSequence(options: FindLongestOptions = {}): Pro
     // Direct file analysis
     const stat = await fs.stat(options.file);
     if (!stat.isFile() || !options.file.endsWith('.jsonl')) {
+      process.stdout.write('\r\x1b[K');
       console.error('Invalid file: must be a .jsonl file');
       return;
     }
@@ -30,11 +31,11 @@ export async function findLongestSequence(options: FindLongestOptions = {}): Pro
       lastModified: stat.mtime,
       size: stat.size
     }];
-    console.log(`Analyzing single file: ${path.basename(options.file)}\n`);
   } else if (options.dir) {
     // Directory analysis
     const dirStat = await fs.stat(options.dir);
     if (!dirStat.isDirectory()) {
+      process.stdout.write('\r\x1b[K');
       console.error('Invalid directory');
       return;
     }
@@ -57,22 +58,20 @@ export async function findLongestSequence(options: FindLongestOptions = {}): Pro
     }
     
     if (files.length === 0) {
+      process.stdout.write('\r\x1b[K');
       console.error('No .jsonl files found in directory');
       return;
     }
-    
-    console.log(`Found ${files.length} transcript files in directory\n`);
   } else {
     // Default: search all projects
     const finder = new SessionFinder();
     files = await finder.find({});
     
     if (files.length === 0) {
+      process.stdout.write('\r\x1b[K');
       console.error('No transcript files found');
       return;
     }
-    
-    console.log(`Found ${files.length} transcript files\n`);
   }
   
   let longestSequence: any = null;
@@ -97,15 +96,20 @@ export async function findLongestSequence(options: FindLongestOptions = {}): Pro
         }
       }
     } catch (error) {
-      console.error(`Error analyzing ${file.filePath}:`, error.message);
+      // Silently skip files with errors
     }
   }
   
   if (!longestSequence) {
+    process.stdout.write('\r\x1b[K');
     console.log('No sequences found in any session');
     return;
   }
   
+  // Clear the loading message
+  process.stdout.write('\r\x1b[K');
+  
   // Display the longest sequence
   console.log(chalk.cyan.bold(`🏆 Claude operated independently for ${chalk.yellow.bold(formatDuration(longestSequence.durationMs))} straight`));
+  console.log(chalk.gray('\nBrought to you by @every'));
 }
