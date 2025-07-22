@@ -1,8 +1,5 @@
 #!/usr/bin/env bun
 import { Command } from 'commander';
-import { render } from 'ink';
-import React from 'react';
-import App from './app-main.js';
 import { loadConfig, ConfigManager } from './config.js';
 import { version } from '../package.json';
 import { exportToFile } from './export/index.js';
@@ -29,7 +26,6 @@ program
   .option('-o, --output <format>', 'Output format (json, csv, table)', 'table')
   .option('-e, --export <path>', 'Export results to file without interactive mode')
   .option('--export-format <format>', 'Export format for non-interactive mode (json, csv, markdown)', 'json')
-  .option('-i, --interactive', 'Enable interactive mode (default: false)')
   .option('--config <path>', 'Path to config file', '~/.cctime/config.json')
   .option('-w, --watch', 'Watch for changes in session files')
   .option('--analyze-sequences', 'Analyze assistant response sequences')
@@ -149,18 +145,6 @@ async function main() {
         console.error('Export failed:', error.message);
         process.exit(1);
       }
-    } else if (options.interactive) {
-      // Interactive mode with Ink
-      const app = render(
-        <App 
-          configManager={configManager}
-          initialFile={options.file}
-          initialDir={options.dir}
-          outputFormat={options.output}
-        />
-      );
-      
-      await app.waitUntilExit();
     } else if (options.longest) {
       // Find longest assistant processing time
       try {
