@@ -1,6 +1,6 @@
 {
   "name": "claude-highscore",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "description": "Claude Code Transcript Time Analyzer - Analyze response times from claude.ai transcripts",
   "main": "dist/cli.js",
   "module": "dist/cli.js",
