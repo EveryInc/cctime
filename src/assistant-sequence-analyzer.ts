@@ -177,8 +177,8 @@ export async function analyzeAssistantSequences(
       
       // Look for assistant responses after this user message
       let previousAssistantTime: Date | null = null;
-      const MAX_GAP_MS = 5 * 60 * 1000; // 5 minutes in milliseconds (reduced from 15)
-      const MAX_SEQUENCE_DURATION_MS = 30 * 60 * 1000; // 30 minutes maximum for any sequence
+      const MAX_GAP_MS = 10 * 60 * 1000; // 10 minutes in milliseconds
+      const MAX_SEQUENCE_DURATION_MS = 12 * 60 * 60 * 1000; // 12 hours maximum for any sequence
       const sequenceStartTime = new Date(userTimestamp);
       
       for (let j = i + 1; j < rawEntries.length; j++) {
@@ -229,7 +229,7 @@ export async function analyzeAssistantSequences(
           const totalDuration = currentTime.getTime() - sequenceStartTime.getTime();
           if (totalDuration > MAX_SEQUENCE_DURATION_MS) {
             if (global.DEBUG_MODE) {
-              console.log(`  Total duration of ${(totalDuration / 1000 / 60).toFixed(1)} minutes exceeds 30 minutes, ending sequence`);
+              console.log(`  Total duration of ${(totalDuration / 1000 / 60 / 60).toFixed(1)} hours exceeds 12 hours, ending sequence`);
             }
             break;
           }
@@ -240,7 +240,7 @@ export async function analyzeAssistantSequences(
             if (gapMs > MAX_GAP_MS) {
               // Gap is too large, this ends the current sequence
               if (global.DEBUG_MODE) {
-                console.log(`  Gap of ${gapMs}ms (${(gapMs / 1000 / 60).toFixed(1)} minutes) exceeds 5 minutes, ending sequence`);
+                console.log(`  Gap of ${gapMs}ms (${(gapMs / 1000 / 60).toFixed(1)} minutes) exceeds 10 minutes, ending sequence`);
               }
               break;
             }
