@@ -177,7 +177,9 @@ export async function analyzeAssistantSequences(
       
       // Look for assistant responses after this user message
       let previousAssistantTime: Date | null = null;
-      const MAX_GAP_MS = 15 * 60 * 1000; // 15 minutes in milliseconds
+      const MAX_GAP_MS = 5 * 60 * 1000; // 5 minutes in milliseconds (reduced from 15)
+      const MAX_SEQUENCE_DURATION_MS = 30 * 60 * 1000; // 30 minutes maximum for any sequence
+      const sequenceStartTime = new Date(userTimestamp);
       
       for (let j = i + 1; j < rawEntries.length; j++) {
         const entry = rawEntries[j];
@@ -186,8 +188,11 @@ export async function analyzeAssistantSequences(
         if (entry.type === 'user') {
           // Check if this is a compact summary (session continuation)
           if (entry.isCompactSummary === true) {
-            // Continue through compact summaries as they're not real user messages
-            continue;
+            // Compact summaries indicate a session restart - end the sequence here
+            if (global.DEBUG_MODE) {
+              console.log(`  Compact summary found, ending sequence`);
+            }
+            break;
           }
           
           const msgObj = entry.message as any;
@@ -220,13 +225,22 @@ export async function analyzeAssistantSequences(
         if (entry.type === 'assistant') {
           const currentTime = new Date(entry.timestamp);
           
+          // Check if we've exceeded maximum sequence duration
+          const totalDuration = currentTime.getTime() - sequenceStartTime.getTime();
+          if (totalDuration > MAX_SEQUENCE_DURATION_MS) {
+            if (global.DEBUG_MODE) {
+              console.log(`  Total duration of ${(totalDuration / 1000 / 60).toFixed(1)} minutes exceeds 30 minutes, ending sequence`);
+            }
+            break;
+          }
+          
           // Check for gap between assistant messages (or tool results)
           if (previousAssistantTime) {
             const gapMs = currentTime.getTime() - previousAssistantTime.getTime();
             if (gapMs > MAX_GAP_MS) {
               // Gap is too large, this ends the current sequence
               if (global.DEBUG_MODE) {
-                console.log(`  Gap of ${gapMs}ms (${(gapMs / 1000 / 60).toFixed(1)} minutes) exceeds 15 minutes, ending sequence`);
+                console.log(`  Gap of ${gapMs}ms (${(gapMs / 1000 / 60).toFixed(1)} minutes) exceeds 5 minutes, ending sequence`);
               }
               break;
             }
@@ -265,11 +279,28 @@ export async function analyzeAssistantSequences(
       
       // If we found assistant messages, create a sequence
       if (firstAssistantIndex !== -1 && lastAssistantIndex !== -1) {
+        // Check if this sequence extends to the end of the file
+        const extendsToEnd = lastAssistantIndex === rawEntries.length - 1 || 
+                            (lastAssistantIndex === rawEntries.length - 2 && 
+                             rawEntries[rawEntries.length - 1].type === 'user' && 
+                             rawEntries[rawEntries.length - 1].message?.content?.some?.((c: any) => 
+                               c.tool_use_id || c.type === 'tool_result'
+                             ));
+        
         const userTime = new Date(userTimestamp);
         const firstTimestamp = new Date(rawEntries[firstAssistantIndex].timestamp);
         const lastTimestamp = new Date(rawEntries[lastAssistantIndex].timestamp);
         const responseTimeMs = firstTimestamp.getTime() - userTime.getTime();
         const durationMs = lastTimestamp.getTime() - firstTimestamp.getTime();
+        
+        // Skip sequences that extend to end of file and are suspiciously long
+        if (extendsToEnd && durationMs > 10 * 60 * 1000) { // 10 minutes
+          if (global.DEBUG_MODE) {
+            console.log(`  Skipping sequence that extends to end of file with duration ${(durationMs / 1000 / 60).toFixed(1)} minutes`);
+          }
+          i = lastAssistantIndex + 1;
+          continue;
+        }
         
         if (global.DEBUG_MODE) {
           console.log(`  Found sequence:`);
