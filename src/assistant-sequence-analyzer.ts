@@ -176,6 +176,9 @@ export async function analyzeAssistantSequences(
       let toolUseCount = 0;
       
       // Look for assistant responses after this user message
+      let previousAssistantTime: Date | null = null;
+      const MAX_GAP_MS = 15 * 60 * 1000; // 15 minutes in milliseconds
+      
       for (let j = i + 1; j < rawEntries.length; j++) {
         const entry = rawEntries[j];
         
@@ -215,10 +218,25 @@ export async function analyzeAssistantSequences(
         
         // Track assistant messages
         if (entry.type === 'assistant') {
+          const currentTime = new Date(entry.timestamp);
+          
+          // Check for gap between assistant messages (or tool results)
+          if (previousAssistantTime) {
+            const gapMs = currentTime.getTime() - previousAssistantTime.getTime();
+            if (gapMs > MAX_GAP_MS) {
+              // Gap is too large, this ends the current sequence
+              if (global.DEBUG_MODE) {
+                console.log(`  Gap of ${gapMs}ms (${(gapMs / 1000 / 60).toFixed(1)} minutes) exceeds 15 minutes, ending sequence`);
+              }
+              break;
+            }
+          }
+          
           if (firstAssistantIndex === -1) {
             firstAssistantIndex = j;
           }
           lastAssistantIndex = j;
+          previousAssistantTime = currentTime;
           
           if (entry.message) {
             messageCount++;
@@ -229,8 +247,20 @@ export async function analyzeAssistantSequences(
             }
           }
         }
-        // Note: We don't update lastAssistantIndex for tool results (user entries)
-        // as they are interleaved messages, not the end of the sequence
+        
+        // Also update previousAssistantTime for tool results to maintain continuity
+        if (entry.type === 'user' && entry.message) {
+          const msgObj = entry.message as any;
+          if (msgObj && msgObj.role === 'user' && msgObj.content && Array.isArray(msgObj.content)) {
+            const hasToolResult = msgObj.content.some((c: any) => 
+              c.tool_use_id || c.type === 'tool_result'
+            );
+            if (hasToolResult) {
+              // This is a tool result, update the time to maintain sequence continuity
+              previousAssistantTime = new Date(entry.timestamp);
+            }
+          }
+        }
       }
       
       // If we found assistant messages, create a sequence
