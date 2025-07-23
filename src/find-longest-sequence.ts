@@ -5,6 +5,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import figlet from 'figlet';
 import { calculateStreaks, formatStreakMessage } from './streak-calculator.js';
+import { execSync } from 'child_process';
 
 interface FindLongestOptions {
   file?: string;
@@ -115,8 +116,31 @@ export async function findLongestSequence(options: FindLongestOptions = {}): Pro
   // Clear the entire terminal
   console.clear();
   
-  // Display the longest sequence as highscore
-  console.log(chalk.cyan.bold(`🏆 Claude agentic highscore: ${chalk.yellow.bold(formatDuration(longestSequence.durationMs))} (best from ${totalSequences} total sessions)`));
+  // Get username
+  let username = 'there';
+  try {
+    username = execSync('whoami', { encoding: 'utf-8' }).trim();
+  } catch (error) {
+    // Fallback if whoami fails
+  }
+  
+  // Display personalized greeting and highscore with bigger, more prominent time
+  console.log(chalk.cyan.bold(`🏆 Congrats ${username}, your Claude agentic highscore is:`));
+  console.log();
+  
+  // Make the time HUGE and prominent
+  const timeText = formatDuration(longestSequence.durationMs);
+  const bigTime = figlet.textSync(timeText, {
+    font: 'Standard',
+    horizontalLayout: 'default',
+    verticalLayout: 'default'
+  });
+  
+  console.log(chalk.yellow.bold(bigTime));
+  console.log();
+  
+  console.log(chalk.gray(`    (best from ${totalSequences} total sessions)`));
+  console.log();
   
   // Calculate and display streak information
   const streakInfo = calculateStreaks(files);
