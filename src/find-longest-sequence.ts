@@ -4,6 +4,7 @@ import { analyzeAssistantSequences, formatDuration } from './assistant-sequence-
 import { promises as fs } from 'fs';
 import path from 'path';
 import figlet from 'figlet';
+import { calculateStreaks, formatStreakMessage } from './streak-calculator.js';
 
 interface FindLongestOptions {
   file?: string;
@@ -116,6 +117,11 @@ export async function findLongestSequence(options: FindLongestOptions = {}): Pro
   
   // Display the longest sequence as highscore
   console.log(chalk.cyan.bold(`🏆 Claude agentic highscore: ${chalk.yellow.bold(formatDuration(longestSequence.durationMs))} (best from ${totalSequences} total sessions)`));
+  
+  // Calculate and display streak information
+  const streakInfo = calculateStreaks(files);
+  console.log(chalk.magenta.bold(formatStreakMessage(streakInfo)));
+  
   console.log(chalk.gray('\nTry it yourself with: npx claude-highscore@latest'));
   console.log(chalk.gray('\nBrought to you by'));
   
