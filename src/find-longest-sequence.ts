@@ -4,7 +4,6 @@ import { analyzeAssistantSequences, formatDuration } from './assistant-sequence-
 import { promises as fs } from 'fs';
 import path from 'path';
 import figlet from 'figlet';
-import { generateContributionGraph } from './contribution-graph.js';
 
 interface FindLongestOptions {
   file?: string;
@@ -117,12 +116,6 @@ export async function findLongestSequence(options: FindLongestOptions = {}): Pro
   
   // Display the longest sequence as highscore
   console.log(chalk.cyan.bold(`🏆 Claude agentic highscore: ${chalk.yellow.bold(formatDuration(longestSequence.durationMs))} (best from ${totalSequences} total sessions)`));
-  
-  // Generate and display contribution graph
-  console.log('\n' + chalk.bold('📊 Your Claude Session Activity:'));
-  const contributionGraph = generateContributionGraph(files);
-  console.log(contributionGraph);
-  
   console.log(chalk.gray('\nTry it yourself with: npx claude-highscore@latest'));
   console.log(chalk.gray('\nBrought to you by'));
   
